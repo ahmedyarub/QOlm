@@ -236,7 +236,18 @@ public:
     int count() const final { return _count; }
 
     bool contains(_Object* object) const { return _objects.contains(object); }
-    int indexOf(_Object* object) const { return _objects.indexOf(object); }
+    int indexOf(_Object* object) const
+    {
+        if(object != nullptr)
+        {
+            return _objects.indexOf(object);
+        }
+        else
+        {
+            qWarning() << "Can't find the index of a nullptr QObject";
+            return -1;
+        }
+    }
     void append(_Object* object)
     {
         if(object != nullptr)
@@ -249,6 +260,10 @@ public:
             updateCounter();
             endInsertRows();
             objectInsertedNotify(object, pos);
+        }
+        else
+        {
+            qWarning() << "Can't append a null Object";
         }
     }
 
@@ -264,6 +279,10 @@ public:
             endInsertRows();
             objectInsertedNotify(item, 0);
         }
+        else
+        {
+            qWarning() << "Can't prepend a null object";
+        }
     }
     void insert(int index, _Object* item)
     {
@@ -276,6 +295,10 @@ public:
             updateCounter();
             endInsertRows();
             objectInsertedNotify(item, index);
+        }
+        else
+        {
+            qWarning() << "Can't insert a null Object";
         }
     }
     void append(const QList<_Object*>& itemList)
@@ -292,6 +315,10 @@ public:
             updateCounter();
             endInsertRows();
             for(int i = 0; i < itemList.count(); ++i) objectInsertedNotify(itemList.at(i), i + pos);
+        }
+        else
+        {
+            qWarning() << "Can't append an empty list";
         }
     }
     void prepend(const QList<_Object*>& itemList)
@@ -312,6 +339,10 @@ public:
             endInsertRows();
             for(int i = 0; i < itemList.count(); ++i) objectInsertedNotify(itemList.at(i), i);
         }
+        else
+        {
+            qWarning() << "Can't prepend an empty list";
+        }
     }
     void insert(int idx, const QList<_Object*>& itemList)
     {
@@ -331,6 +362,10 @@ public:
             endInsertRows();
             for(int i = 0; i < itemList.count(); ++i) objectInsertedNotify(itemList.at(i), i + idx);
         }
+        else
+        {
+            qWarning() << "Can't insert an empty list";
+        }
     }
     void move(int from, int to) override final
     {
@@ -342,11 +377,16 @@ public:
             endMoveRows();
             objectMovedNotify(_objects.at(from), from, to);
         }
+        else
+        {
+            qWarning() << "'From' or 'to' args are out of bound";
+        }
     }
     void remove(_Object* object)
     {
         if(object != nullptr)
             remove(indexOf(object));
+        qWarning() << "Can't remove a null pointer Object of a list";
     }
     void remove(const QList<_Object*>& objects)
     {
@@ -363,6 +403,10 @@ public:
             updateCounter();
             endRemoveRows();
             objectRemovedNotify(item, index);
+        }
+        else
+        {
+            qWarning() << "Can't remove an object whose index is out of bound";
         }
     }
     void clear() override final
@@ -382,10 +426,36 @@ public:
             endRemoveRows();
             for(int i = 0; i < tempList.count(); ++i) objectRemovedNotify(tempList.at(i), i);
         }
+        else
+        {
+            qWarning() << "Can't clear an object whose index is out of bound";
+        }
     }
-    _Object* first() const { return _objects.first(); }
+    _Object* first() const
+    {
+        if(!_objects.isEmpty())
+        {
+            return _objects.first();
+        }
+        else
+        {
+            qWarning() << "The first element of an empty list doesn't exist !";
+            return nullptr;
+        }
+    }
 
-    _Object* last() const { return _objects.last(); }
+    _Object* last() const
+    {
+        if(!_objects.isEmpty())
+        {
+            return _objects.last();
+        }
+        else
+        {
+            qWarning() << "The last element of an empty list doesn't exist !";
+            return nullptr;
+        }
+    }
 
     const QList<_Object*>& toList() const { return _objects; }
 

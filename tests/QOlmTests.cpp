@@ -5,66 +5,445 @@
 
 // gtest framework
 #include <gtest/gtest.h>
+//#include <gmock/gmock.h>
 
 // Our test classes
-#include <FooList.hpp>
+#include <QOlm/QOlm.hpp>
 
 // First basic test fixture that have only one QObject
-class ObjectListTest : public ::testing::Test
+class QOlmTestEmptyList : public ::testing::Test
 {
-protected:
-    void SetUp() override
-    {
-    }
+    protected:
+        void SetUp() override
+        {
 
-    void TearDown() override
-    {
-    }
+        }
+        void TearDown() override
+        {
+            list.clear();
+            delete foo1;
+            delete foo2;
+            delete foo3;
+        }
+    qolm::QOlm<QObject> list;
+    QObject* foo1 = new QObject();
+    QObject* foo2 = new QObject();
+    QObject* foo3 = new QObject();
 
-    FooList _list;
+    QList<QObject*> myEmptyList = {};
 };
 
-TEST_F(ObjectListTest, Append)
+class QOlmTestListFilled : public::testing::Test
 {
-    QSignalSpy spyAboutToInsert(&_list, &qolm::QOlmBase::rowsAboutToBeInserted);
-    QSignalSpy spyInsert(&_list, &qolm::QOlmBase::rowsInserted);
-    ASSERT_EQ(_list.size(), 0);
+protected:
+        void SetUp() override
+        {
+            list.append({foo1, foo2, foo3, foo4});
+        }
+        void TearDown() override
+        {
+            list.clear();
+            delete foo1;
+            delete foo2;
+            delete foo3;
+            delete foo4;
+            delete foo5;
+        }
+    QObject* foo1 = new QObject();
+    QObject* foo2 = new QObject();
+    QObject* foo3 = new QObject();
+    QObject* foo4 = new QObject();
+    QObject* foo5 = new QObject();
+    qolm::QOlm<QObject> list;
 
-    auto foo1 = new Foo();
-    _list.append(foo1);
+};
 
-    ASSERT_EQ(_list.size(), 1);
+TEST_F(QOlmTestListFilled, At)
+{
+    ASSERT_EQ(list.at(2), foo3);
+    ASSERT_EQ(list.at(4), nullptr);
+    ASSERT_EQ(list.at(-1), nullptr);
+}
+
+TEST_F(QOlmTestListFilled, Get)
+{
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(4), nullptr);
+    ASSERT_EQ(list.get(-1), nullptr);
+}
+
+TEST_F(QOlmTestListFilled, Contains)
+{
+    ASSERT_TRUE(list.contains(foo1));
+    ASSERT_TRUE(list.contains(foo2));
+    ASSERT_TRUE(list.contains(foo3));
+    ASSERT_TRUE(list.contains(foo4));
+
+    //With a null pointer
+    ASSERT_FALSE(list.contains(foo5));
+    ASSERT_FALSE(list.contains(nullptr));
+
+}
+
+TEST_F(QOlmTestListFilled, IndexOf)
+{
+    ASSERT_EQ(list.indexOf(foo1), 0);
+    ASSERT_EQ(list.indexOf(foo2), 1);
+    ASSERT_EQ(list.indexOf(foo3), 2);
+
+    //With a null pointer
+    ASSERT_EQ(list.indexOf(nullptr), -1);
+    ASSERT_EQ( list.indexOf(foo5), -1);
+}
+
+TEST_F(QOlmTestEmptyList, AppendQObject)
+{
+    QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
+    QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+    ASSERT_EQ(list.size(), 0);
+
+    list.append(foo1);
+
+    ASSERT_EQ(list.size(), 1);
     ASSERT_EQ(spyAboutToInsert.count(), 1);
     ASSERT_EQ(spyInsert.count(), 1);
 
-    auto foo2 = new Foo();
-    _list.append(foo2);
-    _list.append(foo1);
+    list.append(foo2);
+    list.append(foo1);
 
-    ASSERT_EQ(_list.size(), 3);
+    ASSERT_EQ(list.size(), 3);
     ASSERT_EQ(spyAboutToInsert.count(), 3);
     ASSERT_EQ(spyInsert.count(), 3);
 
-    ASSERT_TRUE(_list.at(0) == foo1);
-    ASSERT_TRUE(_list.at(1) == foo2);
-    ASSERT_TRUE(_list.at(2) == foo1);
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo1);
 
-    _list.clear();
+    //Append a null pointer Object
+    list.append(nullptr);
 
-    delete foo1;
-    delete foo2;
+    ASSERT_EQ(list.size(), 3);
+    ASSERT_EQ(spyAboutToInsert.count(), 3);
+    ASSERT_EQ(spyInsert.count(), 3);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo1);
 }
 
-TEST_F(ObjectListTest, AppendFuzz)
+TEST_F(QOlmTestEmptyList, PrependQObject)
 {
-    auto initTime = QDateTime::currentMSecsSinceEpoch();
-    for(int i = 0; i < 10000; ++i)
-        _list.append(new Foo());
-    auto appendTime = QDateTime::currentMSecsSinceEpoch();
-    ASSERT_EQ(_list.size(), 10000);
-    int i = 0;
-    _list.clear();
-    auto clearTime = QDateTime::currentMSecsSinceEpoch();
+    QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
+    QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+    ASSERT_EQ(list.size(), 0);
 
-    qDebug("Append 10000 QObject Time : %llu ms. Clear time : %llu ms", (appendTime - initTime), (clearTime - appendTime));
+
+    list.prepend(foo1);
+
+    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+    ASSERT_EQ(list.get(0), foo1);
+
+
+    list.prepend(foo2);
+
+    ASSERT_EQ(list.size(), 2);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+
+    ASSERT_EQ(list.get(0), foo2);
+    ASSERT_EQ(list.get(1), foo1);
+
+    //Prepend a null pointer Object
+    list.prepend(nullptr);
+
+    ASSERT_EQ(list.size(), 2);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+
+    ASSERT_EQ(list.get(0), foo2);
+    ASSERT_EQ(list.get(1), foo1);
 }
+
+TEST_F(QOlmTestEmptyList, InsertQObject)
+{
+    QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
+    QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+    ASSERT_EQ(list.size(), 0);
+
+
+    list.insert(0, foo1);
+
+    ASSERT_EQ(list.size(), 1);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+
+
+    list.insert(0, foo2);
+
+    ASSERT_EQ(list.size(), 2);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+
+    ASSERT_EQ(list.get(0), foo2);
+    ASSERT_EQ(list.get(1), foo1);
+
+    // if the user put an index grzater than the maximal index in the list, the object will be inserted get the end of the list
+
+    list.insert(4, foo2);
+
+    ASSERT_EQ(list.size(), 3);
+    ASSERT_EQ(spyAboutToInsert.count(), 3);
+    ASSERT_EQ(spyInsert.count(), 3);
+
+    ASSERT_EQ(list.get(0), foo2);
+    ASSERT_EQ(list.get(1), foo1);
+    ASSERT_EQ(list.get(2), foo2);
+
+    //if the user insert an object get an index which already contains an object, it will create a shift in the list with the next objects
+
+    list.insert(1, foo2);
+
+    ASSERT_EQ(list.size(), 4);
+    ASSERT_EQ(spyAboutToInsert.count(), 4);
+    ASSERT_EQ(spyInsert.count(), 4);
+
+    ASSERT_EQ(list.get(0), foo2);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo1);
+    ASSERT_EQ(list.get(3), foo2);
+}
+
+TEST_F(QOlmTestEmptyList, InsertList)
+{
+    QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
+    QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+    ASSERT_EQ(list.size(), 0);
+
+    QList<QObject*> mylist = {foo1,foo2,foo3};
+    list.insert(0, mylist);
+
+    ASSERT_EQ(list.size(), 3);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo3);
+
+    list.insert(1, mylist);
+
+    ASSERT_EQ(list.size(), 6);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo1);
+    ASSERT_EQ(list.get(2), foo2);
+    ASSERT_EQ(list.get(3), foo3);
+    ASSERT_EQ(list.get(4), foo2);
+    ASSERT_EQ(list.get(5), foo3);
+
+    //Empty List
+    list.insert(2, myEmptyList);
+    ASSERT_EQ(list.size(), 6);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo1);
+    ASSERT_EQ(list.get(2), foo2);
+    ASSERT_EQ(list.get(3), foo3);
+    ASSERT_EQ(list.get(4), foo2);
+    ASSERT_EQ(list.get(5), foo3);
+}
+
+TEST_F(QOlmTestEmptyList, AppendList)
+{
+    QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
+    QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+    ASSERT_EQ(list.size(), 0);
+
+
+    list.append({foo1,foo2,foo3});
+
+    ASSERT_EQ(list.size(), 3);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo3);
+
+    list.append({foo2,foo1,foo3});
+
+    ASSERT_EQ(list.size(), 6);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo3);
+    ASSERT_EQ(list.get(3), foo2);
+    ASSERT_EQ(list.get(4), foo1);
+    ASSERT_EQ(list.get(5), foo3);
+
+    //Empty List
+    list.append(myEmptyList);
+    ASSERT_EQ(list.size(), 6);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+}
+
+TEST_F(QOlmTestEmptyList, PrependList)
+{
+    QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
+    QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+    ASSERT_EQ(list.size(), 0);
+
+    list.prepend({foo1,foo2,foo3});
+
+    ASSERT_EQ(list.size(), 3);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo3);
+
+    list.prepend({foo2,foo1,foo3});
+
+    ASSERT_EQ(list.size(), 6);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+
+    ASSERT_EQ(list.get(0), foo2);
+    ASSERT_EQ(list.get(1), foo1);
+    ASSERT_EQ(list.get(2), foo3);
+    ASSERT_EQ(list.get(3), foo1);
+    ASSERT_EQ(list.get(4), foo2);
+    ASSERT_EQ(list.get(5), foo3);
+
+    //Empty List
+    list.prepend(myEmptyList);
+    ASSERT_EQ(list.size(), 6);
+    ASSERT_EQ(spyAboutToInsert.count(), 2);
+    ASSERT_EQ(spyInsert.count(), 2);
+}
+
+TEST_F(QOlmTestListFilled, Move)
+{
+    QSignalSpy spyAboutToMoved(&list, &qolm::QOlmBase::rowsAboutToBeMoved);
+    QSignalSpy spyMoved(&list, &qolm::QOlmBase::rowsMoved);
+    ASSERT_EQ(list.size(), 4);
+
+    list.move(0,2);
+    ASSERT_EQ(spyAboutToMoved.count(), 1);
+    ASSERT_EQ(spyMoved.count(), 1);
+
+    ASSERT_EQ(list.get(0), foo2);
+    ASSERT_EQ(list.get(1), foo3);
+    ASSERT_EQ(list.get(2), foo1);
+    ASSERT_EQ(list.get(3), foo4);
+}
+
+TEST_F(QOlmTestListFilled, RemoveQObject)
+{
+    QSignalSpy spyAboutToRemoved(&list, &qolm::QOlmBase::rowsAboutToBeRemoved);
+    QSignalSpy spyRemoved(&list, &qolm::QOlmBase::rowsRemoved);
+    ASSERT_EQ(list.size(), 4);
+
+    list.remove(foo2);
+    ASSERT_EQ(spyAboutToRemoved.count(), 1);
+    ASSERT_EQ(spyRemoved.count(), 1);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo3);
+    ASSERT_EQ(list.get(2), foo4);
+}
+
+TEST_F(QOlmTestListFilled, RemoveList)
+{
+    QSignalSpy spyAboutToRemoved(&list, &qolm::QOlmBase::rowsAboutToBeRemoved);
+    QSignalSpy spyRemoved(&list, &qolm::QOlmBase::rowsRemoved);
+    ASSERT_EQ(list.size(), 4);
+
+    list.remove({foo3,foo2});
+    ASSERT_EQ(spyAboutToRemoved.count(), 2);
+    ASSERT_EQ(spyRemoved.count(), 2);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo4);
+}
+TEST_F(QOlmTestListFilled, RemoveIndex)
+{
+    QSignalSpy spyAboutToRemoved(&list, &qolm::QOlmBase::rowsAboutToBeRemoved);
+    QSignalSpy spyRemoved(&list, &qolm::QOlmBase::rowsRemoved);
+    ASSERT_EQ(list.size(), 4);
+
+    list.remove(3);
+    ASSERT_EQ(spyAboutToRemoved.count(), 1);
+    ASSERT_EQ(spyRemoved.count(), 1);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo3);
+
+    list.remove(5);
+    ASSERT_EQ(spyAboutToRemoved.count(), 1);
+    ASSERT_EQ(spyRemoved.count(), 1);
+
+    ASSERT_EQ(list.get(0), foo1);
+    ASSERT_EQ(list.get(1), foo2);
+    ASSERT_EQ(list.get(2), foo3);
+}
+
+TEST_F(QOlmTestListFilled, Clear)
+{
+    QSignalSpy spyAboutToRemoved(&list, &qolm::QOlmBase::rowsAboutToBeRemoved);
+    QSignalSpy spyRemoved(&list, &qolm::QOlmBase::rowsRemoved);
+    ASSERT_EQ(list.size(), 4);
+
+    list.clear();
+    ASSERT_EQ(list.size(), 0);
+}
+
+TEST_F(QOlmTestListFilled, First)
+{
+    ASSERT_EQ(list.first(), foo1);
+}
+
+TEST_F(QOlmTestEmptyList, First)
+{
+    ASSERT_EQ(list.first(), nullptr);
+}
+
+TEST_F(QOlmTestListFilled, Last)
+{
+    ASSERT_EQ(list.last(), foo4);
+}
+TEST_F(QOlmTestEmptyList, Last)
+{
+    ASSERT_EQ(list.last(), nullptr);
+}
+
+TEST_F(QOlmTestListFilled, ToList)
+{
+    QList<QObject*> myList = {foo1, foo2, foo3, foo4};
+    ASSERT_EQ(list.toList(), myList);
+}
+
+// TEST_F(QOlmTest, AppendFuzz)
+// {
+//     auto initTime = QDateTime::currentMSecsSinceEpoch();
+//     for(int i = 0; i < 10000; ++i)
+//         _list.append(new QObject());
+//     auto appendTime = QDateTime::currentMSecsSinceEpoch();
+//     ASSERT_EQ(_list.size(), 10000);
+//     int i = 0;
+//     _list.clear();
+//     auto clearTime = QDateTime::currentMSecsSinceEpoch();
+
+//     qDebug("Append 10000 QObject Time : %llu ms. Clear time : %llu ms", (appendTime - initTime), (clearTime - appendTime));
+// }
