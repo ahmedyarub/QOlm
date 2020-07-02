@@ -719,7 +719,7 @@ public:
     {
         if(index > 0 && index < count())
             move(index, index - 1);
-        qWarning() << "The index is the first of the list or index is out of bound"
+        qWarning() << "The index is the first of the list or index is out of bound";
     }
 
     /** \brief Move index to index+1 */
@@ -734,7 +734,7 @@ public:
         }
         else
         {
-            qWarning() << "The index is the last of the list or index is out of bound"
+            qWarning() << "The index is the last of the list or index is out of bound";
         }
     }
 
