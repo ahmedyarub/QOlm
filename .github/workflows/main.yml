@@ -47,4 +47,4 @@ jobs:
         run: cmake --build build --target "QOlm_TestsQml" --config "Release"
 
       - name: Run unit tests
-        run: cd build && ctest --build-config "Release" --progress --verboses
+        run: cd build && ctest --build-config "Release" --progress --verbose
