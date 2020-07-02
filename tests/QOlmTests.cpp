@@ -20,41 +20,34 @@ class QOlmTestEmptyList : public ::testing::Test
         }
         void TearDown() override
         {
-            list.clear();
-            delete foo1;
-            delete foo2;
-            delete foo3;
-        }
-    qolm::QOlm<QObject> list;
-    QObject* foo1 = new QObject();
-    QObject* foo2 = new QObject();
-    QObject* foo3 = new QObject();
 
-    QList<QObject*> myEmptyList = {};
+        }
+        qolm::QOlm<QObject> list;
+        QObject* foo1 = new QObject(&list);
+        QObject* foo2 = new QObject(&list);
+        QObject* foo3 = new QObject(&list);
+
+        QList<QObject*> myEmptyList = {};
 };
 
 class QOlmTestListFilled : public::testing::Test
 {
-protected:
+    protected:
         void SetUp() override
         {
             list.append({foo1, foo2, foo3, foo4});
         }
         void TearDown() override
         {
-            list.clear();
-            delete foo1;
-            delete foo2;
-            delete foo3;
-            delete foo4;
-            delete foo5;
+
         }
-    QObject* foo1 = new QObject();
-    QObject* foo2 = new QObject();
-    QObject* foo3 = new QObject();
-    QObject* foo4 = new QObject();
-    QObject* foo5 = new QObject();
-    qolm::QOlm<QObject> list;
+        qolm::QOlm<QObject> list;
+        QObject* foo1 = new QObject(&list);
+        QObject* foo2 = new QObject(&list);
+        QObject* foo3 = new QObject(&list);
+        QObject* foo4 = new QObject(&list);
+        QObject* foo5 = new QObject(&list);
+
 
 };
 

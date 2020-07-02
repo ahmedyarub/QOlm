@@ -220,10 +220,9 @@ public:
     _Object* at(int index) const { return get(index); }
     _Object* get(int index) const
     {
-        _Object* ret = nullptr;
-        if(index >= 0 && index < _objects.size())
-            ret = _objects.value(index);
-        return ret;
+        if(index < 0 || index >= _objects.size())
+            return nullptr;
+        return _objects.at(index);
     }
 
     QObject* get(QJSValue index) const override
