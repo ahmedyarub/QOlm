@@ -22,6 +22,11 @@ jobs:
         run: sudo apt-get install libxcb-xinerama0
         if: contains(matrix.os, 'ubuntu')
 
+      - name: Add a path
+        run: |
+          export PATH=/home/runner/work/QOlm/QOlm/Qt-Linux-5.15.0/Qt/5.15.0/gcc_64/plugins/platforms
+          echo $PATH
+
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v2
