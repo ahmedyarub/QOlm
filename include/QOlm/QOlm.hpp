@@ -719,6 +719,7 @@ public:
     {
         if(index > 0 && index < count())
             move(index, index - 1);
+        qWarning() << "The index is the first of the list or index is out of bound"
     }
 
     /** \brief Move index to index+1 */
@@ -728,7 +729,13 @@ public:
             index >= 0 &&  // We can be from the first
             index < (count() - 1)  // To the last one minus 1
         )
-            return moveUp(index + 1);
+        {
+            moveUp(index, index + 1);
+        }
+        else
+        {
+            qWarning() << "The index is the last of the list or index is out of bound"
+        }
     }
 
     // ──────── DEFAULT CHILDREN ──────────

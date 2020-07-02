@@ -182,7 +182,7 @@ TEST_F(QOlmTestEmptyList, InsertQObject)
     ASSERT_EQ(list.get(0), foo2);
     ASSERT_EQ(list.get(1), foo1);
 
-    // if the user put an index grzater than the maximal index in the list, the object will be inserted get the end of the list
+    // if the user put an index greater than the maximal index in the list, the object will be inserted get the end of the list
 
     list.insert(4, foo2);
 
