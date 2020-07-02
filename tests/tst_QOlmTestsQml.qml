@@ -165,8 +165,8 @@ TestCase
 
     //Expected QWARN cases
 
-    data.listFilled.moveDown(1);
-    data.listFilled.moveDown(4);
+    data.listFilled.moveDown(-1);
+    data.listFilled.moveDown(3);
  }
 
 }
