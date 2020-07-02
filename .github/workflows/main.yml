@@ -18,8 +18,8 @@ jobs:
         run: sudo apt-get install libxkbcommon-x11-0
         if: contains(matrix.os, 'ubuntu')
 
-      - name: Install libqt5gui5
-        run: sudo apt-get install libqt5gui5
+      - name: Install libxcb-xinerama0
+        run: sudo apt-get install libxcb-xinerama0
         if: contains(matrix.os, 'ubuntu')
 
       - name: Cache Qt
