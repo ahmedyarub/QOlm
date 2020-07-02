@@ -28,13 +28,11 @@ jobs:
           echo $LD_LIBRARY_PATH
         if: contains(matrix.os, 'ubuntu')
 
-        - name: Add a Library QT_QPA_PLATFORM_PLUGIN_PATH=path/to/plugins
+      - name: Add a Library QT_QPA_PLATFORM_PLUGIN_PATH=path/to/plugins
         run: |
           export QT_QPA_PLATFORM_PLUGIN_PATH=/home/runner/work/QOlm/QOlm/Qt-Linux-5.15.0/Qt/5.15.0/gcc_64/plugins
           echo $QT_QPA_PLATFORM_PLUGIN_PATH
         if: contains(matrix.os, 'ubuntu')
-
-
 
       - name: Cache Qt
         id: cache-qt
