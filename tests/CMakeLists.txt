@@ -56,3 +56,25 @@ set_target_properties(${QOLM_TEST_TARGET_QML} PROPERTIES FOLDER ${QOLM_FOLDER_PR
 
 # Register the test
 add_test(NAME ${QOLM_TEST_TARGET_QML} COMMAND "$<TARGET_FILE:${QOLM_TEST_TARGET_QML}>" -input "${CMAKE_CURRENT_SOURCE_DIR}")
+
+# Mock tests
+set(QOLM_TEST_TARGET_MOCK ${QOLM_TESTS_PREFIX}_TestsGMock)
+
+set(QOLM_TEST_TARGET_MOCK_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(QOLM_TEST_SRCS  ${QOLM_TEST_TARGET_MOCK_DIR}/Tests.cpp
+        ${QOLM_TEST_TARGET_MOCK_DIR}/QOlmTestsGMock.cpp
+    )
+
+message(STATUS "Add Test: ${QOLM_TEST_TARGET_MOCK}")
+
+# Create the executable
+add_executable(${QOLM_TEST_TARGET_MOCK} ${QOLM_TEST_SRCS})
+set_target_properties(${QOLM_TEST_TARGET_MOCK} PROPERTIES AUTOMOC TRUE)
+target_include_directories(${QOLM_TEST_TARGET_MOCK} PUBLIC ${QOLM_TEST_TARGET_MOCK_DIR}/include)
+target_link_libraries(${QOLM_TEST_TARGET_MOCK} PRIVATE ${QOLM_TARGET})
+target_link_libraries(${QOLM_TEST_TARGET_MOCK} PRIVATE Qt5::Test gtest Qt5::Test gmock)
+set_target_properties(${QOLM_TEST_TARGET_MOCK} PROPERTIES FOLDER ${QOLM_FOLDER_PREFIX}/Tests)
+
+# Register the test
+add_test(NAME ${QOLM_TEST_TARGET_MOCK} COMMAND ${QOLM_TEST_TARGET_MOCK})
