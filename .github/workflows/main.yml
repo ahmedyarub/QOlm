@@ -18,6 +18,10 @@ jobs:
         run: sudo apt-get install libxkbcommon-x11-0
         if: contains(matrix.os, 'ubuntu')
 
+      - name: Install libqt5gui5
+        run: sudo apt-get install libqt5gui5
+        if: contains(matrix.os, 'ubuntu')
+
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v2
