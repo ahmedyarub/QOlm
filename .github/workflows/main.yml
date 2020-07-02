@@ -30,10 +30,9 @@ jobs:
         run: sudo apt-get install libegl1-mesa
         if: contains(matrix.os, 'ubuntu')
 
-      - name: Add 'xvfb' module
+      - name: Add 'Xvfb' module
         run: |
-          sudo apt-get install xvfb
-          xvfb :99 &
+          Xvfb :99 &
           export DISPLAY=:99
         if: contains(matrix.os, 'ubuntu')
 
