@@ -285,6 +285,19 @@ public:
     }
     void insert(int index, _Object* item)
     {
+        if(index > count())
+        {
+            qWarning() << "index " << index << " is greater than count "<< count() <<". "
+                << "The item will be inserted at the end of the list";
+            index = count();
+        }
+        else if(index < 0)
+        {
+            qWarning() << "index " << index << " is lower than 0. "
+                       << "The item will be inserted at the beginning of the list";
+            index = 0;
+        }
+
         if(item != nullptr)
         {
             objectAboutToBeInsertedNotify(item, index);
