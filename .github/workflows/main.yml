@@ -30,16 +30,6 @@ jobs:
         run: sudo apt-get install libxcb-icccm4
         if: contains(matrix.os, 'ubuntu')
 
-      - name: Change path
-        run: export QT_QPA_PLATFORM=offscreen
-        if: contains(matrix.os, 'ubuntu')
-
-      - name: Add 'Xvfb' module
-        run: |
-          Xvfb :99 &
-          export DISPLAY=:99
-        if: contains(matrix.os, 'ubuntu')
-
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v2
@@ -76,4 +66,7 @@ jobs:
         run: |
           export QT_DEBUG_PLUGINS=1
           cd build
+          Xvfb :99 &
+          export DISPLAY=:99
           ctest --build-config "Release" --progress --verbose
+        if: contains(matrix.os, 'ubuntu')
