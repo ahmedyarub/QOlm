@@ -5,9 +5,11 @@
 #
 
 # We need QSignalSpy
-find_package(Qt5Test CONFIG REQUIRED)
-find_package(Qt5QuickTest CONFIG REQUIRED)
-find_package(Qt5Quick CONFIG REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS
+    Quick
+    QuickTest
+    Test
+)
 
 set(QOLM_TEST_TARGET ${QOLM_TESTS_PREFIX}_Tests)
 

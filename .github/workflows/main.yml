@@ -40,8 +40,11 @@ jobs:
       - name: Build Examples
         run: cmake --build build --target "QOlm_Example" --config "Release"
 
-      - name: Build Tests
+      - name: Build Cpp Tests
         run: cmake --build build --target "QOlm_Tests" --config "Release"
+
+      - name: Build Qml Tests
+        run: cmake --build build --target "QOlm_TestsQml" --config "Release"
 
       - name: Run unit tests
         run: cd build && ctest --build-config "Release" --progress
