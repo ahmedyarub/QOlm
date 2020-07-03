@@ -381,8 +381,18 @@ public:
     }
     void move(int from, int to) override final
     {
-        if(from != to && from >= 0 && to >= 0 && from < _objects.size() && to < _objects.size())
+        if(from != to && from < _objects.count() && from >= 0 )
         {
+            if(to >= _objects.count())
+            {
+                to = _objects.count() - 1;
+                qWarning() << "'to' " << to << "greater than count " << count();
+            }
+            else if(to < 0)
+            {
+                to = 0;
+                qWarning() << "'to'" << to <<" lower than 0 ";
+            }
             objectAboutToBeMovedNotify(_objects.at(from), from, to);
             beginMoveRows(noParent(), from, from, noParent(), (from < to ? to + 1 : to));
             _objects.move(from, to);
@@ -391,7 +401,7 @@ public:
         }
         else
         {
-            qWarning() << "'From' or 'to' args are out of bound";
+            qWarning() << "'From' "<< from << "is out of bound";
         }
     }
     void remove(_Object* object)
