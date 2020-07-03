@@ -1,14 +1,16 @@
-// Spy signal call without having a main loop
-#include <QSignalSpy>
-#include <QDateTime>
-#include <QDebug>
+// Our test classes
+#include <QOlm/QOlm.hpp>
 
 // gtest framework
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-// Our test classes
-#include <QOlm/QOlm.hpp>
+// Spy signal call without having a main loop
+#include <QSignalSpy>
+
+// stl headers
+#include <queue>
+#include <utility>
 
 class QOlmTestListFilled : public ::testing::Test
 {
@@ -468,30 +470,26 @@ TEST_F(QOlmTestEmptyList, InsertList)
     EXPECT_CALL(list, onObjectInserted(foo3, 3));
     ASSERT_EQ(list.size(), 0);
 
-    bool expectedCallback = false;
-    int expectedIndex = -1;
-    QObject* expectedObject = nullptr;
+    std::queue<std::pair<int, QObject*>> expectedCallback;
 
     list.onInserted(
         [&](const auto& args)
         {
-            ASSERT_TRUE(expectedCallback);
-            ASSERT_EQ(expectedIndex, args.index);
-            ASSERT_EQ(expectedObject, args.object);
+            ASSERT_TRUE(!expectedCallback.empty());
+            const auto [index, object] = expectedCallback.front();
+            ASSERT_EQ(index, args.index);
+            ASSERT_EQ(object, args.object);
 
-            expectedCallback = false;
-            expectedIndex = -1;
-            expectedObject = nullptr;
+            expectedCallback.pop();
         });
     list.onMoved([&](const auto& args) { ASSERT_TRUE(false); });
     list.onRemoved([&](const auto& args) { ASSERT_TRUE(false); });
 
-    expectedCallback = true;
-    expectedIndex = 2;
-    expectedObject = foo3;
-
-    QList<QObject*> mylist = {foo1, foo2, foo3};
-    list.insert(0, mylist);
+    QList<QObject*> insertedList = {foo1, foo2, foo3};
+    expectedCallback.push(std::make_pair(0, foo1));
+    expectedCallback.push(std::make_pair(1, foo2));
+    expectedCallback.push(std::make_pair(2, foo3));
+    list.insert(0, insertedList);
 
     ASSERT_EQ(list.size(), 3);
     ASSERT_EQ(spyAboutToInsert.count(), 1);
@@ -501,7 +499,10 @@ TEST_F(QOlmTestEmptyList, InsertList)
     ASSERT_EQ(list.get(1), foo2);
     ASSERT_EQ(list.get(2), foo3);
 
-    list.insert(1, mylist);
+    expectedCallback.push(std::make_pair(1, foo1));
+    expectedCallback.push(std::make_pair(2, foo2));
+    expectedCallback.push(std::make_pair(3, foo3));
+    list.insert(1, insertedList);
 
     ASSERT_EQ(list.size(), 6);
     ASSERT_EQ(spyAboutToInsert.count(), 2);
