@@ -205,20 +205,80 @@ TEST_F(QOlmTestEmptyList, PrependQObject)
 {
     QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
     QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo1, 0));
+    EXPECT_CALL(list, onObjectInserted(foo1, 0));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo2, 0));
+    EXPECT_CALL(list, onObjectInserted(foo2, 0));
+
     ASSERT_EQ(list.size(), 0);
+
+    bool expectedCallback = false;
+    int expectedIndex = -1;
+    QObject* expectedObject = nullptr;
+
+    list.onInserted(
+        [&](const auto& args)
+        {
+            ASSERT_TRUE(expectedCallback);
+            ASSERT_EQ(expectedIndex, args.index);
+            ASSERT_EQ(expectedObject, args.object);
+
+            expectedCallback = false;
+            expectedIndex = -1;
+            expectedObject = nullptr;
+        });
+    list.onMoved([&](const auto& args) { ASSERT_TRUE(false); });
+    list.onRemoved([&](const auto& args) { ASSERT_TRUE(false); });
+
+    expectedCallback = true;
+    expectedIndex = 0;
+    expectedObject = foo1;
 
     list.prepend(foo1);
 
     ASSERT_EQ(list.size(), 1);
     ASSERT_EQ(spyAboutToInsert.count(), 1);
     ASSERT_EQ(spyInsert.count(), 1);
+    {
+        const auto args = spyAboutToInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 0);
+        ASSERT_EQ(last, 0);
+    }
+    {
+        const auto args = spyInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 0);
+        ASSERT_EQ(last, 0);
+    }
     ASSERT_EQ(list.get(0), foo1);
+
+    expectedCallback = true;
+    expectedIndex = 0;
+    expectedObject = foo2;
 
     list.prepend(foo2);
 
     ASSERT_EQ(list.size(), 2);
-    ASSERT_EQ(spyAboutToInsert.count(), 2);
-    ASSERT_EQ(spyInsert.count(), 2);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+    {
+        const auto args = spyAboutToInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 0);
+        ASSERT_EQ(last, 0);
+    }
+    {
+        const auto args = spyInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 0);
+        ASSERT_EQ(last, 0);
+    }
 
     ASSERT_EQ(list.get(0), foo2);
     ASSERT_EQ(list.get(1), foo1);
@@ -227,8 +287,8 @@ TEST_F(QOlmTestEmptyList, PrependQObject)
     list.prepend(nullptr);
 
     ASSERT_EQ(list.size(), 2);
-    ASSERT_EQ(spyAboutToInsert.count(), 2);
-    ASSERT_EQ(spyInsert.count(), 2);
+    ASSERT_EQ(spyAboutToInsert.count(), 0);
+    ASSERT_EQ(spyInsert.count(), 0);
 
     ASSERT_EQ(list.get(0), foo2);
     ASSERT_EQ(list.get(1), foo1);
@@ -238,30 +298,112 @@ TEST_F(QOlmTestEmptyList, InsertQObject)
 {
     QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
     QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo1, 0));
+    EXPECT_CALL(list, onObjectInserted(foo1, 0));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo2, 0));
+    EXPECT_CALL(list, onObjectInserted(foo2, 0));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo2, 2));
+    EXPECT_CALL(list, onObjectInserted(foo2, 2));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo2, 1));
+    EXPECT_CALL(list, onObjectInserted(foo2, 1));
+
     ASSERT_EQ(list.size(), 0);
+
+    bool expectedCallback = false;
+    int expectedIndex = -1;
+    QObject* expectedObject = nullptr;
+
+    list.onInserted(
+        [&](const auto& args)
+        {
+            ASSERT_TRUE(expectedCallback);
+            ASSERT_EQ(expectedIndex, args.index);
+            ASSERT_EQ(expectedObject, args.object);
+
+            expectedCallback = false;
+            expectedIndex = -1;
+            expectedObject = nullptr;
+        });
+    list.onMoved([&](const auto& args) { ASSERT_TRUE(false); });
+    list.onRemoved([&](const auto& args) { ASSERT_TRUE(false); });
+
+    expectedCallback = true;
+    expectedIndex = 0;
+    expectedObject = foo1;
 
     list.insert(0, foo1);
 
     ASSERT_EQ(list.size(), 1);
     ASSERT_EQ(spyAboutToInsert.count(), 1);
     ASSERT_EQ(spyInsert.count(), 1);
+    {
+        const auto args = spyAboutToInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 0);
+        ASSERT_EQ(last, 0);
+    }
+    {
+        const auto args = spyInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 0);
+        ASSERT_EQ(last, 0);
+    }
+
+    expectedCallback = true;
+    expectedIndex = 0;
+    expectedObject = foo2;
 
     list.insert(0, foo2);
 
     ASSERT_EQ(list.size(), 2);
-    ASSERT_EQ(spyAboutToInsert.count(), 2);
-    ASSERT_EQ(spyInsert.count(), 2);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+    {
+        const auto args = spyAboutToInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 0);
+        ASSERT_EQ(last, 0);
+    }
+    {
+        const auto args = spyInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 0);
+        ASSERT_EQ(last, 0);
+    }
 
     ASSERT_EQ(list.get(0), foo2);
     ASSERT_EQ(list.get(1), foo1);
 
     // if the user put an index greater than the maximal index in the list, the object will be inserted get the end of the list
 
+    expectedCallback = true;
+    expectedIndex = 2;
+    expectedObject = foo2;
+
     list.insert(4, foo2);
 
     ASSERT_EQ(list.size(), 3);
-    ASSERT_EQ(spyAboutToInsert.count(), 3);
-    ASSERT_EQ(spyInsert.count(), 3);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+    {
+        const auto args = spyAboutToInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 2);
+        ASSERT_EQ(last, 2);
+    }
+    {
+        const auto args = spyInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 2);
+        ASSERT_EQ(last, 2);
+    }
 
     ASSERT_EQ(list.get(0), foo2);
     ASSERT_EQ(list.get(1), foo1);
@@ -269,23 +411,84 @@ TEST_F(QOlmTestEmptyList, InsertQObject)
 
     //if the user insert an object get an index which already contains an object, it will create a shift in the list with the next objects
 
+    expectedCallback = true;
+    expectedIndex = 1;
+    expectedObject = foo2;
+
     list.insert(1, foo2);
 
     ASSERT_EQ(list.size(), 4);
-    ASSERT_EQ(spyAboutToInsert.count(), 4);
-    ASSERT_EQ(spyInsert.count(), 4);
+    ASSERT_EQ(spyAboutToInsert.count(), 1);
+    ASSERT_EQ(spyInsert.count(), 1);
+    {
+        const auto args = spyAboutToInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 1);
+        ASSERT_EQ(last, 1);
+    }
+    {
+        const auto args = spyInsert.takeFirst();
+        const auto first = args.at(1).toInt();
+        const auto last = args.at(2).toInt();
+        ASSERT_EQ(first, 1);
+        ASSERT_EQ(last, 1);
+    }
 
     ASSERT_EQ(list.get(0), foo2);
     ASSERT_EQ(list.get(1), foo2);
     ASSERT_EQ(list.get(2), foo1);
     ASSERT_EQ(list.get(3), foo2);
+
+    //Null pointer insert
+
+    list.insert(1, nullptr);
+
+    ASSERT_EQ(list.size(), 4);
+    ASSERT_EQ(spyAboutToInsert.count(), 0);
+    ASSERT_EQ(spyInsert.count(), 0);
 }
 
 TEST_F(QOlmTestEmptyList, InsertList)
 {
     QSignalSpy spyAboutToInsert(&list, &qolm::QOlmBase::rowsAboutToBeInserted);
     QSignalSpy spyInsert(&list, &qolm::QOlmBase::rowsInserted);
+
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo1, 0));
+    EXPECT_CALL(list, onObjectInserted(foo1, 0));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo2, 1));
+    EXPECT_CALL(list, onObjectInserted(foo2, 1));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo3, 2));
+    EXPECT_CALL(list, onObjectInserted(foo3, 2));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo1, 1));
+    EXPECT_CALL(list, onObjectInserted(foo1, 1));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo2, 2));
+    EXPECT_CALL(list, onObjectInserted(foo2, 2));
+    EXPECT_CALL(list, onObjectAboutToBeInserted(foo3, 3));
+    EXPECT_CALL(list, onObjectInserted(foo3, 3));
     ASSERT_EQ(list.size(), 0);
+
+    bool expectedCallback = false;
+    int expectedIndex = -1;
+    QObject* expectedObject = nullptr;
+
+    list.onInserted(
+        [&](const auto& args)
+        {
+            ASSERT_TRUE(expectedCallback);
+            ASSERT_EQ(expectedIndex, args.index);
+            ASSERT_EQ(expectedObject, args.object);
+
+            expectedCallback = false;
+            expectedIndex = -1;
+            expectedObject = nullptr;
+        });
+    list.onMoved([&](const auto& args) { ASSERT_TRUE(false); });
+    list.onRemoved([&](const auto& args) { ASSERT_TRUE(false); });
+
+    expectedCallback = true;
+    expectedIndex = 2;
+    expectedObject = foo3;
 
     QList<QObject*> mylist = {foo1, foo2, foo3};
     list.insert(0, mylist);
