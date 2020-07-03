@@ -40,16 +40,16 @@ jobs:
         shell: bash
 
       - name: Build QOlm
-        run: cmake --build build --target "QOlm" --config "Release"
+        run: cmake --build build --target "QOlm" --config "Release" -j
 
       - name: Build Examples
-        run: cmake --build build --target "QOlm_Example" --config "Release"
+        run: cmake --build build --target "QOlm_Example" --config "Release" -j
 
       - name: Build Cpp Tests
-        run: cmake --build build --target "QOlm_Tests" --config "Release"
+        run: cmake --build build --target "QOlm_Tests" --config "Release" -j
 
       - name: Build Qml Tests
-        run: cmake --build build --target "QOlm_TestsQml" --config "Release"
+        run: cmake --build build --target "QOlm_TestsQml" --config "Release" -j
 
       - name: Run unit tests
         run: cd build && ctest --build-config "Release" --progress --verbose
